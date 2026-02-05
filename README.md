@@ -91,28 +91,6 @@ afl-goal-predictor/
 - Python 3.8+
 - Git
 
-### Installation
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/afl-goal-predictor.git
-   cd afl-goal-predictor
-   ```
-
-2. **Set up a virtual environment** (recommended)
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Download the data**
-   - Obtain the dataset from [Kaggle](https://www.kaggle.com/datasets/stoney71/aflstats)
-   - Place `players.csv` and `stats.csv` in the `data/raw/` directory
-
 ### Usage
 Run the analysis pipeline in order:
 
