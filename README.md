@@ -1,11 +1,11 @@
 # AFL Goal-Scoring Predictor: An Enterprise Data Science Project
 
-## 🎯 Project Overview
+## Project Overview
 This repository contains the code, analysis, and documentation for our Enterprise Data Science & Machine Learning in Production (INSY674) project. We built an **explainable machine learning system** to predict goal-scoring probability for AFL players, transforming over a century of historical sports data into a strategic decision-support tool for coaching departments.
 
 **Core Value Proposition:** Professional sports are high-stakes enterprises. AFL teams invest millions, yet critical match strategies often rely on intuition rather than empirical evidence. Our solution helps the Coaching Department make better decisions by providing data-backed predictions. This isn't just a scoreboard forecast; it's a decision-support system to understand opponent weaknesses and optimize team selection.
 
-## 📋 Business Challenge & Solution
+## Business Challenge & Solution
 
 ### The Challenge
 - **High-Stakes Decisions:** AFL teams make multi-million dollar decisions on player selection, strategy, and recruitment with limited empirical backing.
