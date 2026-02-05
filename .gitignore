@@ -1,0 +1,26 @@
+# Ignore data files (too large for GitHub)
+data/raw/
+data/processed/
+*.csv
+*.parquet
+
+# Ignore Python cache and virtual environments
+__pycache__/
+*.py[cod]
+venv/
+env/
+
+# Ignore notebook checkpoints and outputs
+.ipynb_checkpoints/
+notebooks/*.html
+
+# Ignore MLflow runs
+mlruns/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files
+.vscode/
+.idea/
