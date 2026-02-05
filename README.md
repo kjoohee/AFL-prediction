@@ -61,11 +61,7 @@ afl-goal-predictor/
 │
 ├── src/                            # Source code modules
 │   ├── data/                       # Data processing scripts
-│   │   ├── make_dataset.py
-│   │   └── build_features.py
 │   ├── models/                     # Modeling scripts
-│   │   ├── train_model.py
-│   │   └── predict_model.py
 │   └── visualization/              # Visualization utilities
 │       └── visualize.py
 │
