@@ -13,72 +13,91 @@ This repository contains the code, analysis, and documentation for our Enterpris
 - **Intuition vs. Evidence:** Coaches and selectors often rely on experience over data-driven probability, potentially missing key performance indicators.
 
 ### Our Solution
-We developed a predictive analytics engine that:
-1.  **Predicts Goal-Scoring Probability:** Estimates the likelihood of individual players scoring goals based on their attributes and game context.
-2.  **Explains the "Why":** Uses Explainable AI (XAI) to identify which factors (e.g., kicks, inside-50s, height) most influence each prediction.
-3.  **Provides Actionable Insights:** Translates model outputs into strategic recommendations for team selection and opponent analysis.
+We developed a **two-part analytics engine**:
 
-## Hypothesis & Research Questions
-Our project tests six core hypotheses about factors influencing goal-scoring probability in AFL:
+1. **Predictive Model** *(located in `/models` folder)*: A machine learning system that predicts goal-scoring probability for individual players based on their attributes and game context, with full explainability via SHAP.
+2. **Causal Inference Model** *(located in `/models` folder)*: Tests hypotheses about *why* performance happens—understanding the causal impact of physical attributes (height, weight, BMI) and rule changes on player performance across positions.
+   
+## Hypothesis & Research Questions (Causal Analysis)
+Our causal inference analysis tested six core hypotheses about factors influencing AFL player performance:
 
-| Hypothesis Category | Hypothesis Statement | Rationale & Business Insight |
-| :--- | :--- | :--- |
-| **Physical Attributes** | **H1 (Height):** Increased player height is positively correlated with goal-scoring probability. | Taller players may have an advantage in aerial contests and marking near goals. Helps in recruiting and positioning key forwards. |
-| | **H2 (Weight):** Higher player weight is negatively correlated with goal-scoring probability. | Heavier players may sacrifice agility and speed needed to create scoring opportunities. Informs fitness and conditioning programs. |
-| **Performance Metrics** | **H3 (Kicks):** A higher frequency of kicks will significantly increase the likelihood of goals. | Directly measures shooting volume and opportunity creation. Identifies players who effectively convert possession into attempts. |
-| | **H4 (Handballs):** Increased handball volume will show a positive correlation with scoring opportunities. | Measures involvement in build-up play and team ball movement. Highlights playmakers who create chances for others. |
-| | **H5 (Inside-50s):** The number of 'Inside-50' entries will be the strongest positive predictor of goal-scoring. | Represents a team's ability to move the ball into scoring positions. A key metric for assessing midfield-to-forward connection. |
-| **Contextual Factor** | **H6 (HomeTeam):** Playing as the Home Team will amplify the impact of other performance metrics. | Tests the "Home Ground Advantage" effect and whether it makes player strengths more pronounced. Helps in pre-game psychological preparation. |
+| Hypothesis | Treatment | Effect On | Key Finding |
+|------------|-----------|-----------|-------------|
+| **H1** | Height | Position-specific outcomes | Rucks (+4.84 HitOuts) - MASSIVE effect; Forwards (-0.31) - negative |
+| **H2** | Weight | Clearances, HitOuts | Rucks (+4.69) & Midfield (+0.68) benefit; Forwards/Defenders don't |
+| **H3** | BMI | Running vs contest stats | Higher BMI benefits EVERY position - modern game rewards physicality |
+| **H4** | is_home | Key outcomes | Only rucks benefit (+0.32 HitOuts) - familiar bounce rhythms matter |
+| **H5** | Rule changes | How effects changed over time | 6-6-6 rule made height 9x more valuable (+896%); rotation caps nearly eliminated weight advantage |
+
+## Predictive Model (Coming Soon - in `/models` folder)
+
+### Model Architecture
+We are developing a **stacked ensemble model** that combines:
+- **XGBoost/LightGBM** for handling non-linear relationships and feature interactions
+- **Neural Networks** for capturing complex patterns in player performance
+- **Logistic Regression** as a interpretable baseline
+
+### Features Used for Prediction
+- **Player Physical Attributes:** Height, weight, BMI, age, primary position
+- **Performance Metrics:** Kicks, handballs, marks, tackles, inside-50s, clearances (historical averages)
+- **Contextual Features:** Home/away status, opponent strength, venue, weather conditions
+- **Derived Metrics:** Efficiency ratios, form trends (last 5 games), career stage indicators
+
+### Explainability (XAI)
+We implement **SHAP (SHapley Additive exPlanations)** to:
+- Identify which features most influence each player's goal-scoring probability
+- Provide coaches with transparent, interpretable predictions
+- Validate or challenge our causal hypotheses
+- Generate actionable insights for team selection and opponent analysis
+
+### Model Evaluation
+- **Primary Metric:** AUC-ROC (Area Under the Receiver Operating Characteristic Curve)
+- **Secondary Metrics:** Precision, Recall, F1-Score, Log-Loss
+- **Validation Strategy:** Time-based split to prevent data leakage (train on 2012-2022, validate on 2023-2025)
 
 ## Data Overview
 
 **Source:** [Kaggle 'AFL Stats' Dataset](https://www.kaggle.com/datasets/stoney71/aflstats)
-- **players.csv:** Individual players' performance statistics per game (e.g., kicks, handballs, marks, tackles).
-- **stats.csv:** Match outcomes, scores, venues, attendance, and team-level statistics.
-- **Scope:** Covers **125+ years** of league history (1897 - 2025).
+- **players.csv:** Individual players' performance statistics per game (e.g., kicks, handballs, marks, tackles)
+- **stats.csv:** Match outcomes, scores, venues, attendance, and team-level statistics
+- **Scope:** Covers **125+ years** of league history (1897 - 2025)
 
 ### Data Challenges & Preprocessing
 This project involved significant real-world data engineering:
-- **Historical Inconsistencies:** Rule changes, stat definitions, and recording methods evolved over 12+ decades.
-- **Data Gaps:** Missing values are prevalent in early 20th-century records.
-- **Entity Resolution:** Team name variations across decades (e.g., "University" team existed only from 1908-1914) required careful mapping.
-- **Data Integration:** Joining player-level and match-level data to create a unified feature set for modeling.
+- **Historical Inconsistencies:** Rule changes, stat definitions, and recording methods evolved over 12+ decades
+- **Data Gaps:** Missing values prevalent in early 20th-century records
+- **Entity Resolution:** Team name variations across decades required careful mapping
+- **Data Integration:** Joining player-level and match-level data to create unified feature set
 
 ## Repository Structure
 ```
-afl-goal-predictor/
+AFL-prediction/
 │
 ├── data/                           # Data directory
-│   ├── raw/                        # Original, immutable data
-│   ├── processed/                  # Cleaned, transformed data
-│   └── external/                   # Any supplementary data
+│   ├── raw/                        # Original, immutable data (stats.csv, players.csv, games.csv)
+│   ├── processed/                   # Cleaned, transformed data (df_final.csv)
+│   └── external/                    # Any supplementary data
 │
-├── notebooks/                      # Jupyter notebooks for analysis
-│   ├── 01_eda.ipynb               # Exploratory Data Analysis
-│   ├── 02_feature_engineering.ipynb # Feature creation & selection
-│   ├── 03_modeling.ipynb          # Model training & evaluation
-│   └── 04_explainability.ipynb    # SHAP analysis & interpretation
+├── notebooks/                       # Jupyter notebooks for analysis
+│   └── stats_correlation_heatmap.png # Visualization outputs
 │
-├── src/                            # Source code modules
-│   ├── data/                       # Data processing scripts
-│   ├── models/                     # Modeling scripts
-│   └── visualization/              # Visualization utilities
-│       └── visualize.py
+├── Models/                          # Model artifacts and notebooks (MAIN FOCUS)
+│   └── Casual Model.ipynb           # Completed causal inference analysis (H1-H5)
+│   └── Predictive Model.ipynb        # (Coming Soon) Goal prediction model with SHAP
+│   └── final_model.pkl               # (Future) Saved model artifact
 │
-├── models/                         # Saved model artifacts
-│   ├── final_model.pkl
-│   └── model_performance.json
-│
-├── reports/                        # Generated reports
-│   ├── figures/                    # Graphs and visualizations
+├── reports/                          # Generated reports
+│   ├── figures/                      # Graphs and visualizations
 │   └── final_report.pdf
 │
-├── .github/workflows/              # CI/CD pipelines (if applicable)
-├── .gitignore                      # Files to ignore in version control
-├── requirements.txt                # Python dependencies
-├── environment.yml                 # Conda environment
-├── mlflow.yaml                     # MLflow configuration
-└── README.md                       # This file
+├── src/                              # Source code modules
+│   ├── data/                         # Data processing scripts
+│   ├── models/                        # Modeling scripts (future)
+│   └── visualization/                  # Visualization utilities
+│
+├── .gitignore                        # Files to ignore in version control
+├── requirements.txt                   # Python dependencies
+└── README.md                          # This file
 ```
 
 ## Getting Started
@@ -86,65 +105,50 @@ afl-goal-predictor/
 ### Prerequisites
 - Python 3.8+
 - Git
+- Jupyter Notebook / VSCode
 
-### Usage
-Run the analysis pipeline in order:
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/fayeflight2727-coder/AFL-prediction.git
 
-1. **Exploratory Data Analysis**
+# Navigate to project directory
+cd AFL-prediction
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Run the Analysis
+1. **Causal Analysis (Completed)**
    ```bash
-   jupyter notebook notebooks/01_eda.ipynb
+   jupyter notebook Models/Casual\ Model.ipynb
    ```
 
-2. **Feature Engineering**
+2. **Predictive Modeling (Coming Soon)**
    ```bash
-   jupyter notebook notebooks/02_feature_engineering.ipynb
+   jupyter notebook Models/Predictive\ Model.ipynb
    ```
 
-3. **Model Training & Evaluation**
-   ```bash
-   python src/models/train_model.py
-   ```
+## Key Results
 
-4. **Model Interpretation**
-   ```bash
-   jupyter notebook notebooks/04_explainability.ipynb
-   ```
+### Causal Analysis Findings
+- **6-6-6 Rule (2019):** Made height **9x more valuable** for rucks (+896% effect)
+- **Rotation Caps:** Nearly eliminated weight advantage for midfielders (-87.6% effect)
+- **Home Advantage:** Only real for rucks (+0.32 hitouts)
+- **BMI:** Benefits EVERY position - modern game rewards physicality everywhere
 
-## Methodology
+### Predictive Model (Expected Outcomes)
+- **Goal:** Predict goal-scoring probability with >0.80 AUC-ROC
+- **Top Predictors Expected:** Inside-50s, kicks, clearances, position-specific factors
+- **Business Impact:** Provide coaches with data-backed player selection and opponent analysis
 
-### Feature Engineering
-We created several feature categories from the raw data:
-- **Player Physical Attributes:** Height, weight, position
-- **Performance Metrics:** Kicks, handballs, marks, tackles, inside-50s
-- **Contextual Features:** Home/away status, venue, season stage
-- **Derived Metrics:** Efficiency ratios, per-game averages, trend indicators
-
-### Modeling Approach
-1. **Data Splitting:** Time-based split to prevent data leakage
-2. **Baseline Models:** Logistic Regression, Random Forest
-3. **Advanced Models:** XGBoost, LightGBM, Neural Networks
-4. **Hyperparameter Tuning:** Grid search with cross-validation
-5. **Ensemble Methods:** Stacking and blending best-performing models
-
-### Explainable AI (XAI)
-We implemented SHAP (SHapley Additive exPlanations) to:
-- Identify global feature importance across all predictions
-- Provide local explanations for individual player predictions
-- Validate or challenge our initial hypotheses
-- Generate actionable insights for coaching staff
-
-## Results & Business Impact
-
-### Key Findings
-- **Most Predictive Features:** [To be filled after analysis - e.g., Inside-50s, kicks, specific player positions]
-- **Hypothesis Validation:** [Which hypotheses were supported/refuted by the data]
-- **Model Performance:** [Accuracy, precision, recall, AUC-ROC metrics]
-
-### Strategic Applications
+## Strategic Applications
 1. **Talent Identification:** Pinpoint players with high scoring potential who may be undervalued
 2. **Opponent Analysis:** Identify weaknesses in opposing teams' defensive structures
 3. **Tactical Optimization:** Determine which playing styles maximize scoring probability
-4. **In-Game Decision Support:** Provide real-time substitution and strategy recommendations
+4. **In-Game Decision Support:** Real-time substitution and strategy recommendations
+5. **Recruitment:** Data-backed decisions on which physical attributes matter for each position
 
 ## Team
 **McGill University MMA8 INSY674 Team:**
