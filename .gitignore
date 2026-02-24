@@ -1,8 +1,8 @@
 # Ignore data files (too large for GitHub)
 data/raw/
-data/processed/
-*.csv
-*.parquet
+# data/processed/
+# *.csv
+# *.parquet
 
 # Ignore Python cache and virtual environments
 __pycache__/
