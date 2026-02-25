@@ -16,16 +16,17 @@ import os
 # ──────────────────────────────────────────────────────────────────────────────
 # CONFIG & PATHS
 # ──────────────────────────────────────────────────────────────────────────────
-DATA_PATH = r"C:\Users\kzooo\0. McGill Course\3. INSY 674\AFL-prediction\data\processed\df_final_final.csv"
-CAUSAL_DIR = r"C:\Users\kzooo\0. McGill Course\3. INSY 674\AFL-prediction\Models\causal_results"
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../"))
+DATA_PATH = os.path.join(PROJECT_ROOT, "data", "processed", "df_final_final.csv")
+CAUSAL_DIR = os.path.join(PROJECT_ROOT, "Models", "causal_results")
+PRED_SUMMARY_PATH = os.path.join(PROJECT_ROOT, "reports", "tables", "predictive_model_summary.xlsx")
 
 ATE_PATH = os.path.join(CAUSAL_DIR, "ate_results.csv")
 RULE_PATH = os.path.join(CAUSAL_DIR, "rule_change_results.csv")
 REFUTATION_PATH = os.path.join(CAUSAL_DIR, "refutation_results.csv")
 HTE_PATH = os.path.join(CAUSAL_DIR, "hte_results.csv")
-
-# 예측 모델 결과 엑셀 파일
-PRED_SUMMARY_PATH = r"C:\Users\kzooo\0. McGill Course\3. INSY 674\AFL-prediction\Models\predictive_model_summary.xlsx"
 
 st.set_page_config(page_title="AFL Performance Dashboard", page_icon="🏈", layout="wide", initial_sidebar_state="expanded")
 
@@ -227,7 +228,7 @@ if COL_GOALS and COL_GOAL_SCORED:
 tabs = st.tabs(["📊 Overview", "📈 Exploratory Analysis", "🧬 Causal Inference", "🤖 Predictive Model"])
 
 # ──────────────────────────────────────────────────────────────────────────────
-# TAB 0 — OVERVIEW (복구 완료!)
+# TAB 0 — OVERVIEW
 # ──────────────────────────────────────────────────────────────────────────────
 with tabs[0]:
     st.markdown("## Dataset Overview")
@@ -277,7 +278,7 @@ with tabs[0]:
         c4.metric("Avg Age", f"{filtered_df[COL_AGE].mean():.1f} yrs")
 
 # ──────────────────────────────────────────────────────────────────────────────
-# TAB 1 — EXPLORATORY ANALYSIS (복구 완료!)
+# TAB 1 — EXPLORATORY ANALYSIS
 # ──────────────────────────────────────────────────────────────────────────────
 with tabs[1]:
     st.markdown("## 📈 Exploratory Data Analysis")
@@ -382,7 +383,14 @@ with tabs[1]:
             with col1:
                 temp_home = filtered_df.copy()
                 temp_home["Location"] = temp_home[COL_HOME].map({1: "Home", 0: "Away"})
-                fig = px.histogram(temp_home, x=COL_GOALS, color="Location", barmode="overlay", title="Goals: Home vs Away", color_discrete_map={"Home": COLOR_ACCENT, "Away": COLOR_SECONDARY}, template=PLOTLY_TEMPLATE)
+                fig = px.histogram(
+                    temp_home, x=COL_GOALS, color="Location", barmode="overlay", 
+                    title="Goals: Home vs Away", 
+                    color_discrete_map={"Home": COLOR_ACCENT, "Away": COLOR_SECONDARY}, 
+                    category_orders={"Location": ["Home", "Away"]}, 
+                    opacity=0.8,
+                    template=PLOTLY_TEMPLATE
+                )
                 st.plotly_chart(fig, use_container_width=True)
             with col2:
                 rates = pd.DataFrame({"Location": ["Home", "Away"], "Rate": [home_df[COL_GOAL_SCORED].mean(), away_df[COL_GOAL_SCORED].mean()]})
@@ -390,7 +398,7 @@ with tabs[1]:
                 st.plotly_chart(fig2, use_container_width=True)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# TAB 2 — CAUSAL INFERENCE (짤림 방지, 3자리)
+# TAB 2 — CAUSAL INFERENCE 
 # ──────────────────────────────────────────────────────────────────────────────
 with tabs[2]:
     st.markdown("## 🧬 Causal Inference")
@@ -454,17 +462,87 @@ with tabs[2]:
             st.plotly_chart(fig, use_container_width=True)
 
     with ci_sub[5]:
-        st.markdown("### 🛡️ Robustness & Heterogeneous Effects")
-        st.dataframe(ref_csv, use_container_width=True, hide_index=True)
-        y_col = "Benefit" if "Benefit" in hte_csv.columns else "ATE"
-        fig = px.bar(hte_csv, x="Segment", y=y_col, color=y_col, color_continuous_scale=["#0f3460", "#e94560"], template=PLOTLY_TEMPLATE, title="Who Benefits Most? (HTE)")
-        fig.update_traces(texttemplate="%{y:+.3f}", textposition="outside", cliponaxis=False, textfont=dict(size=13))
-        y_max, y_min = hte_csv[y_col].max(), hte_csv[y_col].min()
-        fig.update_layout(height=400, margin=dict(t=80, b=30), yaxis=dict(range=[y_min * 1.5 if y_min < 0 else 0, y_max * 1.5 if y_max > 0 else 0]))
-        st.plotly_chart(fig, use_container_width=True)
+        st.markdown("### 🛡️ Heterogeneous Treatment Effects (HTE) Analysis")
+        st.markdown("*\"Who benefits most? Player segments reveal the story behind the averages\"*")
+
+        st.divider()
+
+        # 1. KEY TAKEAWAYS (Streamlit Info/Success Boxes)
+        st.markdown("#### 🧠 Coaching Takeaways")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.success("**👴 Age is the Dominant Factor**\n\nPhysical attributes help young/prime players but consistently **hurt veterans** across every position.")
+        with c2:
+            st.info("**🌱 The Rookie Advantage**\n\nPlayers early in their career (<50 games) consistently show stronger positive effects from height and weight.")
+        with c3:
+            st.warning("**📉 Averages Lie**\n\nA tall young ruck gains **+7.2 hitouts**; a tall veteran loses **-5.0**. Recruit based on career cycle, not just specs.")
+
+        st.divider()
+
+        # 2. SEGMENT SUMMARY TABLE (The "Gap" Analysis)
+        st.markdown("#### 📊 Segment Summary: Best vs Worst")
+        gap_data = pd.DataFrame({
+            "Position": ["Ruck", "Ruck", "Forward", "Forward", "Defender", "Midfield", "Midfield"],
+            "Treatment": ["Height", "Weight", "Weight", "Height", "Weight", "Height", "Weight"],
+            "Best Segment": ["Young (<23): +7.24", "Rookies (<50 games): +5.19", "Young (<23): +0.15", "Prime (23-28): +0.91", "Rookies (<50 games): -0.11", "Young (<23): +0.04", "Rookies (<50 games): +0.27"],
+            "Worst Segment": ["Veterans (>150 games): -5.03", "Veterans (>150 games): -0.53", "Veterans (>150 games): -1.56", "Veterans (>28): -0.51", "Veterans (>28): -0.77", "Veterans (>28): -0.54", "Established (50-150 games): -0.11"],
+            "Gap": [12.27, 5.72, 1.71, 1.42, 0.66, 0.58, 0.38]
+        })
+        st.dataframe(gap_data.style.background_gradient(subset=['Gap'], cmap='Reds'), use_container_width=True, hide_index=True)
+
+        st.divider()
+
+        # 3. DEEP DIVE METRICS BY POSITION (Using Expanders and Metrics for clean UI)
+        st.markdown("#### 🔍 Detailed Deep Dive by Position")
+        
+        with st.expander("🏋️ Ruck (Massive Height & Weight Effects)", expanded=True):
+            r_col1, r_col2 = st.columns(2)
+            with r_col1:
+                st.markdown("**Height → HitOuts (ATE: +1.05)**")
+                r1, r2 = st.columns(2)
+                r1.metric("Best: Young (<23)", "+7.24", "Massive Advantage")
+                r2.metric("Worst: Veterans (>150 games)", "-5.03", "Liability", delta_color="inverse")
+                st.caption("Height is a massive advantage for young rucks but a liability for veterans.")
+            with r_col2:
+                st.markdown("**Weight → HitOuts (ATE: +4.03)**")
+                r3, r4 = st.columns(2)
+                r3.metric("Best: Rookies (<50 games)", "+5.19", "Strong Positive")
+                r4.metric("Worst: Veterans (>150 games)", "-0.53", "Negative", delta_color="inverse")
+                st.caption("Weight helps rucks of all ages EXCEPT veterans.")
+
+        with st.expander("🎯 Forward (Height vs Weight)"):
+            f_col1, f_col2 = st.columns(2)
+            with f_col1:
+                st.markdown("**Height → TotalScore (ATE: +0.31)**")
+                f1, f2 = st.columns(2)
+                f1.metric("Best: Prime (23-28)", "+0.91", "Helps Prime")
+                f2.metric("Worst: Veterans (>28)", "-0.51", "Hurts Veterans", delta_color="inverse")
+                st.caption("Height helps prime-age forwards but hurts veterans.")
+            with f_col2:
+                st.markdown("**Weight → TotalScore (ATE: -0.29)**")
+                f3, f4 = st.columns(2)
+                f3.metric("Best: Young (<23)", "+0.15", "Only positive segment")
+                f4.metric("Worst: Veterans (>150 games)", "-1.56", "Destroys performance", delta_color="inverse")
+                st.caption("'Power forwards' thrive early but decline faster.")
+
+        with st.expander("🏃 Midfield & 🛡️ Defender"):
+            m_col1, m_col2 = st.columns(2)
+            with m_col1:
+                st.markdown("**Midfield: Weight → Clearances (ATE: +0.05)**")
+                m1, m2 = st.columns(2)
+                m1.metric("Best: Rookies (<50 games)", "+0.27", "Peak physical years")
+                m2.metric("Worst: Established (50-150 games)", "-0.11", "Advantage fades", delta_color="inverse")
+                st.caption("Weight helps young/rookie midfielders, but advantage disappears with age.")
+            with m_col2:
+                st.markdown("**Defender: Weight → Rebounds (ATE: -0.32)**")
+                d1, d2 = st.columns(2)
+                d1.metric("Best: Rookies (<50 games)", "-0.11", "Least negative")
+                d2.metric("Worst: Veterans (>28)", "-0.77", "Hurts badly", delta_color="inverse")
+                st.caption("Weight hurts all defenders. Veterans with bulk are most disadvantaged.")
+
 
 # ──────────────────────────────────────────────────────────────────────────────
-# TAB 4 — PREDICTIVE MODEL (엑셀 연동)
+# TAB 4 — PREDICTIVE MODEL
 # ──────────────────────────────────────────────────────────────────────────────
 with tabs[3]:
     st.markdown("## 🤖 Predictive Model Results")
@@ -487,10 +565,18 @@ with tabs[3]:
     insight_box("**XGBoost is the best overall model** for capturing variance (highest R²). Random Forest is competitive on MAE. Defender stats are the hardest to predict (R² ~0.34), while Ruck hit-outs are highly predictable (R² ~0.59).")
     st.divider()
     
-    st.markdown("### 📋 Full Performance Metrics (Loaded from Excel)")
-    format_dict = {"MAE": "{:.3f}", "RMSE": "{:.3f}"}
-    if "R2" in perf_data.columns: format_dict["R2"] = "{:.3f}"
-    st.dataframe(perf_data.style.format(format_dict), use_container_width=True, hide_index=True)
+    st.markdown("### 📋 Full Performance Metrics")
+    
+    # 🚀 FIX: Drop columns that are entirely 'None' or NaN so they don't clutter the UI
+    perf_display = perf_data.replace("None", np.nan).dropna(axis=1, how='all')
+    
+    # Apply formatting only to columns that actually exist after dropping 'None' ones
+    format_dict = {}
+    for col in ["MAE", "RMSE", "R2"]:
+        if col in perf_display.columns:
+            format_dict[col] = "{:.3f}"
+            
+    st.dataframe(perf_display.style.format(format_dict), use_container_width=True, hide_index=True)
     st.divider()
 
     st.markdown("### 🔍 Feature Importance & SHAP Insights")
@@ -500,10 +586,12 @@ with tabs[3]:
         with pred_sub[i]:
             col_a, col_b = st.columns([1, 1.5])
             with col_a:
-                st.markdown("#### 📂 Features Used (from Excel)")
+                st.markdown("#### 📂 Features Used")
                 if feat_data is not None:
-                    pos_feat = feat_data[feat_data["Position"] == pos]
-                    st.dataframe(pos_feat[["Model", "Num_Features", "Features"]], use_container_width=True, hide_index=True)
+                    pos_feat = feat_data[feat_data["Position"] == pos].copy()
+                    # 🚀 FIX: Drop 'None' columns here too (e.g., Target(y) if empty)
+                    pos_feat_display = pos_feat.replace("None", np.nan).dropna(axis=1, how='all')
+                    st.dataframe(pos_feat_display, use_container_width=True, hide_index=True)
                 
                 if pos == "Forward":
                     st.markdown("**Top Drivers (Linear):**\n1. 🟢 MarksInside50\n2. 🟢 Frees\n3. 🟢 Disposals\n4. 🔴 Clangers")
@@ -528,19 +616,6 @@ with tabs[3]:
                 elif pos == "Defender":
                     st.markdown("Defender rebounds are best explained by **transition-defense activity** (Disposals, OnePercenters) rather than body profile alone. Heavy weight acts as a negative predictor for rebound generation.")
                     insight_box("Elite rebounding requires athletic agility to move the ball out, which heavy defenders lack.")
-
-    st.divider()
-    st.markdown("### 🎯 Final Conclusions")
-    st.info("""
-    Across all positions, **role-specific in-game involvement variables** are the strongest predictors of output. 
-    Predictive models **confirm the causal inference findings**: 
-    * Height × 6-6-6 rule interaction for rucks
-    * Weight helping midfield clearances
-    * High BMI penalizing defender rebounds
-    
-    The nonlinear XGBoost model effectively captures these complex interactions, offering the most accurate tool for performance prediction.
-    """)
-
 # FOOTER
 st.divider()
 st.markdown("<div style='text-align:center; color:#888; font-size:0.85rem;'>AFL Performance Analysis Dashboard | Team 5</div>", unsafe_allow_html=True)
