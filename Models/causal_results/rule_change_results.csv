@@ -1,0 +1,4 @@
+Rule_Key,Position,Treatment,Outcome,Pre_ATE,Post_ATE,Change_Pct,Interpretation
+Ruck_666,Ruck,Height,HitOuts,0.8269169244317582,8.23624024650697,896.0178590088428,Stronger after rule change
+Midfield_Stand,Midfield,BMI,Clearances,0.7752209609111591,0.42386717652737776,-45.32305008507719,Weaker after rule change
+Midfield_RotationCaps,Midfield,Weight (continuous),Clearances,,,,
