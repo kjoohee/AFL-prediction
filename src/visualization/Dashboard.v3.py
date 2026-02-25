@@ -20,7 +20,7 @@ import os
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../"))
 DATA_PATH = os.path.join(PROJECT_ROOT, "data", "processed", "df_final_final.csv")
-CAUSAL_DIR = os.path.join(PROJECT_ROOT, "Models", "causal_results")
+CAUSAL_DIR = os.path.join(PROJECT_ROOT, "reports", "causal_results")
 PRED_SUMMARY_PATH = os.path.join(PROJECT_ROOT, "reports", "tables", "predictive_model_summary.xlsx")
 
 ATE_PATH = os.path.join(CAUSAL_DIR, "ate_results.csv")
