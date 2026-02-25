@@ -10,3 +10,7 @@ notebook>=6.5.0
 mlflow>=2.0.0
 shap>=0.41.0
 ipython>=8.10.0
+streamlit
+plotly
+scipy
+openpyxl
