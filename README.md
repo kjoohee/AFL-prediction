@@ -74,7 +74,6 @@ We implement **SHAP (SHapley Additive exPlanations)** to:
 **Source:** [Kaggle 'AFL Stats' Dataset](https://www.kaggle.com/datasets/stoney71/aflstats)
 - **players.csv:** Individual players' performance statistics per game (e.g., kicks, handballs, marks, tackles)
 - **stats.csv:** Match outcomes, scores, venues, attendance, and team-level statistics
-- **Scope:** Covers **125+ years** of league history (1897 - 2025)
 
 ### Data Challenges & Preprocessing
 This project involved significant real-world data engineering:
