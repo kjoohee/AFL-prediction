@@ -87,28 +87,28 @@ This project involved significant real-world data engineering:
 ```
 AFL-prediction/
 │
-├── data/                           # Data directory
-│   ├── raw/                        # Original, immutable data (stats.csv, players.csv, games.csv)
-│   └── processed/                   # Cleaned, transformed data (df_final.csv)
+├── data/                            # Data directory
+│   ├── raw/                         # Original, immutable data (stats.csv, players.csv, games.csv)
+│   └── processed/                   # Cleaned data and processing logic (df_final_final.csv, Cleaned_Data.ipynb)
 │
+├── Models/                          # Model artifacts and notebooks
+│   ├── Casual Model.ipynb           # Completed causal inference analysis (H1-H5)
+│   └── Predictive Model.ipynb       # Completed position-specific predictive modeling
 │
-├── Models/                          # Model artifacts and notebooks (MAIN FOCUS)
-│   └── Casual Model.ipynb           # Completed causal inference analysis (H1-H5)
-│   └── Predictive Model.ipynb        # (Coming Soon) Goal prediction model with SHAP
-│   └── final_model.pkl               # (Future) Saved model artifact
+├── reports/                         # Generated outputs
+│   ├── figures/                     
+│   │   ├── Causal Model/            # HTE plots for physical attributes
+│   │   └── Predictive Model/        # Coefficients, SHAP values, and model comparisons
+│   └── tables/                      
+│       └── predictive_model_summary.xlsx # Quantitative performance metrics
 │
-├── reports/                          # Generated reports
-│   ├── figures/                      # Graphs and visualizations
-│   └── final_report.pdf
+├── src/                             # Source code modules
+│   └── visualization/               
+│       └── Dashboard.v3.py          # Streamlit dashboard source
 │
-├── src/                              # Source code modules
-│   ├── data/                         # Data processing scripts
-│   ├── models/                        # Modeling scripts (future)
-│   └── visualization/                  # Visualization utilities
-│
-├── .gitignore                        # Files to ignore in version control
-├── requirements.txt                   # Python dependencies
-└── README.md                          # This file
+├── .gitignore                       # Files to ignore (e.g., .DS_Store)
+├── requirements.txt                 # Python dependencies
+└── README.md                        # This file
 ```
 
 ## Getting Started
