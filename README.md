@@ -31,19 +31,8 @@ We developed a **two-part analytics engine**:
 
 1. **Predictive Model** *(located in `/models` folder)*: A machine learning system that predicts goal-scoring probability for individual players based on their attributes and game context, with full explainability via SHAP.
 2. **Causal Inference Model** *(located in `/models` folder)*: Tests hypotheses about *why* performance happens—understanding the causal impact of physical attributes (height, weight, BMI) and rule changes on player performance across positions.
-   
-## Hypothesis & Research Questions (Causal Analysis)
-Our causal inference analysis tested six core hypotheses about factors influencing AFL player performance:
 
-| Hypothesis | Treatment | Effect On | Key Finding |
-|------------|-----------|-----------|-------------|
-| **H1** | Height | Position-specific outcomes | Rucks (+4.84 HitOuts) - MASSIVE effect; Forwards (-0.31) - negative |
-| **H2** | Weight | Clearances, HitOuts | Rucks (+4.69) & Midfield (+0.68) benefit; Forwards/Defenders don't |
-| **H3** | BMI | Running vs contest stats | Higher BMI benefits EVERY position - modern game rewards physicality |
-| **H4** | is_home | Key outcomes | Only rucks benefit (+0.32 HitOuts) - familiar bounce rhythms matter |
-| **H5** | Rule changes | How effects changed over time | 6-6-6 rule made height 9x more valuable (+896%); rotation caps nearly eliminated weight advantage |
-
-## Predictive Model (in `/models` folder)
+## Predictive Model (in /models folder)
 
 ### Model Architecture
 We are developing a **stacked ensemble model** that combines:
@@ -69,46 +58,55 @@ We implement **SHAP (SHapley Additive exPlanations)** to:
 - **Secondary Metrics:** Precision, Recall, F1-Score, Log-Loss
 - **Validation Strategy:** Time-based split to prevent data leakage (train on 2012-2022, validate on 2023-2025)
 
+## Hypothesis & Research Questions (Causal Analysis)
+Our causal inference analysis tested six core hypotheses about factors influencing AFL player performance:
+
+| Hypothesis | Treatment | Effect On | Key Finding |
+|------------|-----------|-----------|-------------|
+| **H1** | Height | Position-specific outcomes | Rucks (+4.84 HitOuts) - MASSIVE effect; Forwards (-0.31) - negative |
+| **H2** | Weight | Clearances, HitOuts | Rucks (+4.69) & Midfield (+0.68) benefit; Forwards/Defenders don't |
+| **H3** | BMI | Running vs contest stats | Higher BMI benefits EVERY position - modern game rewards physicality |
+| **H4** | is_home | Key outcomes | Only rucks benefit (+0.32 HitOuts) - familiar bounce rhythms matter |
+| **H5** | Rule changes | How effects changed over time | 6-6-6 rule made height 9x more valuable (+896%); rotation caps nearly eliminated weight advantage |
+
 ## Data Overview
 
 **Source:** [Kaggle 'AFL Stats' Dataset](https://www.kaggle.com/datasets/stoney71/aflstats)
 - **players.csv:** Individual players' performance statistics per game (e.g., kicks, handballs, marks, tackles)
 - **stats.csv:** Match outcomes, scores, venues, attendance, and team-level statistics
-- **Scope:** Covers **125+ years** of league history (1897 - 2025)
 
 ### Data Challenges & Preprocessing
 This project involved significant real-world data engineering:
-- **Historical Inconsistencies:** Rule changes, stat definitions, and recording methods evolved over 12+ decades
-- **Data Gaps:** Missing values prevalent in early 20th-century records
-- **Entity Resolution:** Team name variations across decades required careful mapping
+- **Historical Inconsistencies:** Rule changes over decade
+- **Entity Resolution:** Team name variations required careful mapping
 - **Data Integration:** Joining player-level and match-level data to create unified feature set
 
 ## Repository Structure
 ```
 AFL-prediction/
 │
-├── data/                           # Data directory
-│   ├── raw/                        # Original, immutable data (stats.csv, players.csv, games.csv)
-│   └── processed/                   # Cleaned, transformed data (df_final.csv)
+├── data/                            # Data directory
+│   ├── raw/                         # Original, immutable data (stats.csv, players.csv, games.csv)
+│   └── processed/                   # Cleaned data and processing logic (df_final_final.csv, Cleaned_Data.ipynb)
 │
+├── Models/                          # Model artifacts and notebooks
+│   ├── Casual Model.ipynb           # Completed causal inference analysis (H1-H5)
+│   └── Predictive Model.ipynb       # Completed position-specific predictive modeling
 │
-├── Models/                          # Model artifacts and notebooks (MAIN FOCUS)
-│   └── Casual Model.ipynb           # Completed causal inference analysis (H1-H5)
-│   └── Predictive Model.ipynb        # (Coming Soon) Goal prediction model with SHAP
-│   └── final_model.pkl               # (Future) Saved model artifact
+├── reports/                         # Generated outputs
+│   ├── figures/                     
+│   │   ├── Causal Model/            # HTE plots for physical attributes
+│   │   └── Predictive Model/        # Coefficients, SHAP values, and model comparisons
+│   └── tables/                      
+│       └── predictive_model_summary.xlsx # Quantitative performance metrics
 │
-├── reports/                          # Generated reports
-│   ├── figures/                      # Graphs and visualizations
-│   └── final_report.pdf
+├── src/                             # Source code modules
+│   └── visualization/               
+│       └── Dashboard.v3.py          # Streamlit dashboard source
 │
-├── src/                              # Source code modules
-│   ├── data/                         # Data processing scripts
-│   ├── models/                        # Modeling scripts (future)
-│   └── visualization/                  # Visualization utilities
-│
-├── .gitignore                        # Files to ignore in version control
-├── requirements.txt                   # Python dependencies
-└── README.md                          # This file
+├── .gitignore                       # Files to ignore (e.g., .DS_Store)
+├── requirements.txt                 # Python dependencies
+└── README.md                        # This file
 ```
 
 ## Getting Started
