@@ -77,9 +77,8 @@ We implement **SHAP (SHapley Additive exPlanations)** to:
 
 ### Data Challenges & Preprocessing
 This project involved significant real-world data engineering:
-- **Historical Inconsistencies:** Rule changes, stat definitions, and recording methods evolved over 12+ decades
-- **Data Gaps:** Missing values prevalent in early 20th-century records
-- **Entity Resolution:** Team name variations across decades required careful mapping
+- **Historical Inconsistencies:** Rule changes over decade
+- **Entity Resolution:** Team name variations required careful mapping
 - **Data Integration:** Joining player-level and match-level data to create unified feature set
 
 ## Repository Structure
