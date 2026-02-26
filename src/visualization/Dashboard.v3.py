@@ -20,7 +20,7 @@ import os
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../"))
 DATA_PATH = os.path.join(PROJECT_ROOT, "data", "processed", "df_final_final.csv")
-CAUSAL_DIR = os.path.join(PROJECT_ROOT, "reports", "causal_results")
+CAUSAL_DIR = os.path.join(PROJECT_ROOT, "reports", "tables")
 PRED_SUMMARY_PATH = os.path.join(PROJECT_ROOT, "reports", "tables", "predictive_model_summary.xlsx")
 
 ATE_PATH = os.path.join(CAUSAL_DIR, "ate_results.csv")
@@ -130,8 +130,34 @@ def load_predictive_excel(path, fallback_perf):
 df = load_data()
 
 # Fallback Causal Data
-_fb_ate = pd.DataFrame({"Hypothesis": ["C1_Height"]*4 + ["C2_Weight"]*4 + ["C3_BMI_primary"]*4 + ["C4_Home"]*4, "Position": ["Forward","Midfield","Ruck","Defender"]*4, "Outcome": ["TotalScore","Clearances","HitOuts","Rebounds"]*4, "ATE_XGB": [-0.307, 0.060, 4.842, -0.577,  -0.158, 0.675, 4.693, -0.303, 0.182, 0.687, 1.418, 0.102,  -0.051, -0.021, 0.322, -0.068], "ATE_LRS": [-0.261, 0.047, 4.770, -0.526,  -0.281, 0.591, 4.184, -0.303, 0.182, 0.687, 1.418, 0.102,  -0.051, -0.021, 0.322, -0.068]})
-_fb_rule = pd.DataFrame({"Rule_Key": ["Ruck_666", "Midfield_Stand", "Midfield_RotCaps"], "Pre_ATE": [0.827, 0.775, 0.818], "Post_ATE": [8.236, 0.424, 0.101], "Change_Pct": [896.0, -45.3, -87.6]})
+_fb_ate = pd.DataFrame({
+    "Hypothesis": ["C1_Height"]*4 + ["C2_Weight"]*4 + ["C3_BMI_primary"]*4 + ["C4_Home"]*4,
+    "Position":   ["Forward","Midfield","Ruck","Defender"]*4,
+    "Outcome":    ["TotalScore","Clearances","HitOuts","Rebounds"]*4,
+    # ── Exact values from ate_results.csv ───────────────────────────────────
+    "ATE_XGB": [
+         0.0640, -0.0973,  3.6604, -0.3891,   # H1 Height
+        -0.3170,  0.2108,  4.2189, -0.2537,   # H2 Weight
+         0.6435,  0.6213,  1.5823, -0.1079,   # H3 BMI
+        -0.0258,  0.0122,  0.1988, -0.0718,   # H4 Home
+    ],
+    "ATE_LRS": [
+         0.1022, -0.1857, -0.5155, -0.1524,   # H1 Height
+        -0.1866,  0.1243,  0.0880,  0.0014,   # H2 Weight
+         0.1301,  0.0099,  0.9108, -0.0314,   # H3 BMI
+        None,     None,    None,    None,      # H4 Home (binary treatment, no LRS)
+    ],
+})
+_fb_rule = pd.DataFrame({
+    "Rule_Key":   ["Ruck_666",  "Midfield_Stand", "Midfield_RotCaps"],
+    # ── Actual values from Casual_Model.ipynb ───────────────────────────────
+    # Ruck 6-6-6: Pre=0.310, Post=7.219, Change=+2225.9%
+    # Midfield Stand: Pre=0.228, Post=0.229, Change=+0.4%  → H5 NOT supported
+    # Midfield RotCaps: high-rot era=0.674, low-rot era=0.021, Change=−96.9%
+    "Pre_ATE":    [0.3104,      0.2284,           0.6744],
+    "Post_ATE":   [7.2189,      0.2294,           0.0211],
+    "Change_Pct": [2225.9,      0.43,             -96.87],
+})
 _fb_ref = pd.DataFrame({"Test": ["Random Common Cause", "Placebo Treatment", "Data Subset (50%)", "Bootstrap"], "Result": ["✅ Robust (Δ=0.000)", "✅ Pass (placebo≈0)", "✅ Stable (Δ<0.001)", "⚠️ High Variance"]})
 _fb_hte = pd.DataFrame({"Segment": ["Young (<23)", "Rookies (<50)", "Weak Teams", "Prime (23-28)", "Veterans (>150)"], "Benefit": [7.291, 5.993, 5.442, 6.504, -2.521]})
 
@@ -203,7 +229,7 @@ with st.sidebar:
     st.markdown("### 📜 AFL Rule Changes")
     st.markdown('<div class="rule-timeline"><b>2019</b> — 6-6-6 Starting Positions<br>Players locked in zones at centre bounces → more open space</div>', unsafe_allow_html=True)
     st.markdown('<div class="rule-timeline"><b>2021</b> — Stand Rule<br>Players must stand still when opponent marks → faster ball movement</div>', unsafe_allow_html=True)
-    st.markdown('<div class="rule-timeline"><b>2016–21</b> — Rotation Caps<br>Interchange limits reduced 120 → 90 → 75 → lifted<br>Endurance & weight matter more with fewer rotations</div>', unsafe_allow_html=True)
+    st.markdown('<div class="rule-timeline"><b>2016–present</b> — Rotation Caps<br>Interchange limits reduced 120 → 90 → 75 (caps still in effect)<br>Weight advantage for midfielders has nearly collapsed in the low-rotation era (2020+)</div>', unsafe_allow_html=True)
 
     st.divider()
     st.markdown("### [INSY674] Team 5")
@@ -378,7 +404,7 @@ with tabs[1]:
     with eda_sub[5]:
         if COL_HOME and COL_GOALS and COL_GOAL_SCORED:
             home_df, away_df = filtered_df[filtered_df[COL_HOME] == 1], filtered_df[filtered_df[COL_HOME] == 0]
-            insight_box("Home advantage is statistically significant but acts as a slight tailwind rather than a primary driver.")
+            insight_box("Home advantage shows a modest positive signal at the team level. Causal analysis confirms the effect is meaningful only for **Rucks** (+0.199 HitOuts) and minor for **Midfielders** (+0.012 Clearances), with no significant boost for Forwards or Defenders.")
             col1, col2 = st.columns(2)
             with col1:
                 temp_home = filtered_df.copy()
@@ -420,11 +446,11 @@ with tabs[2]:
 
     with ci_sub[0]:
         hypothesis_badge("H1", "Does height cause better performance?")
-        hypothesis_result("Partially Supported", "Height provides a massive advantage for Rucks (+4.84), but surprisingly negative effects for Forwards/Defenders.")
+        hypothesis_result("Partially Supported", "Height provides a massive advantage for Rucks (+3.66), a slight benefit for Forwards (+0.06), but negative effects for Midfielders and Defenders.")
         d = get_hyp("C1")
         if len(d) > 0:
             st.plotly_chart(causal_pos_bar(d, "H1: Height Effect (ATE)"), use_container_width=True)
-            causal_verdict("**Ruck (+4.842)**: Tall rucks (>201cm) dominate — MASSIVE effect. **Forward (−0.307)**: Agility matters more.")
+            causal_verdict("**Ruck (+3.660)**: Tall rucks (>201cm) dominate — MASSIVE effect. **Forward (+0.064)**: Slight positive; agility still matters more for scoring.")
 
     with ci_sub[1]:
         hypothesis_badge("H2", "Does weight cause better contest performance?")
@@ -432,23 +458,23 @@ with tabs[2]:
         d = get_hyp("C2")
         if len(d) > 0:
             st.plotly_chart(causal_pos_bar(d, "H2: Weight Effect (ATE)"), use_container_width=True)
-            causal_verdict("**Midfield (+0.675)**: Heavier mids win contested ball. **Defender (−0.303)**: Lighter defenders rebound better.")
+            causal_verdict("**Midfield (+0.211)**: Heavier mids win contested ball. **Defender (−0.250)**: Lighter defenders rebound better.")
 
     with ci_sub[2]:
         hypothesis_badge("H3", "Does BMI affect performance?")
-        hypothesis_result("Supported", "Higher BMI benefits ALL positions, disproving the 'lean' athlete myth.")
+        hypothesis_result("Partially Supported", "Higher BMI benefits Forwards, Midfielders, and Rucks — but hurts Defenders in rebound production (trade-off with defensive acts).")
         d = get_hyp("C3_BMI_primary")
         if len(d) > 0:
             st.plotly_chart(causal_pos_bar(d, "H3: BMI Effect (ATE)"), use_container_width=True)
-            causal_verdict("**Ruck (+1.418)**: Body positioning dominates. **Midfield (+0.687)**: Muscle mass aids clearances.")
+            causal_verdict("**Ruck (+1.582)**: Body positioning dominates. **Midfield (+0.621)**: Muscle mass aids clearances. **Defender (−0.110)**: Higher BMI trades rebounds for defensive acts.")
 
     with ci_sub[3]:
         hypothesis_badge("H4", "Does playing at home improve performance?")
-        hypothesis_result("Partially Supported", "Home advantage is real ONLY for Rucks.")
+        hypothesis_result("Partially Supported", "Home advantage is meaningful for Rucks (+0.199), with a minor positive signal for Midfielders (+0.012). Forwards and Defenders show no home benefit.")
         d = get_hyp("C4")
         if len(d) > 0:
             st.plotly_chart(causal_pos_bar(d, "H4: Home Advantage Effect (ATE)"), use_container_width=True)
-            causal_verdict("**Ruck (+0.322)**: Familiar bounce rhythms matter. **Others (~0)**: No significant boost.")
+            causal_verdict("**Ruck (+0.199)**: Familiar bounce rhythms matter. **Midfield (+0.012)**: Minor crowd-energy boost. **Forwards/Defenders (~0)**: No significant home boost.")
 
     with ci_sub[4]:
         hypothesis_badge("H5", "Have AFL rule changes shifted causal effects?")
@@ -475,18 +501,36 @@ with tabs[2]:
         with c2:
             st.info("**🌱 The Rookie Advantage**\n\nPlayers early in their career (<50 games) consistently show stronger positive effects from height and weight.")
         with c3:
-            st.warning("**📉 Averages Lie**\n\nA tall young ruck gains **+7.2 hitouts**; a tall veteran loses **-5.0**. Recruit based on career cycle, not just specs.")
+            st.warning("**📉 Averages Lie**\n\nA tall young ruck gains **+8.2 hitouts**; a tall veteran loses **-5.0**. Recruit based on career cycle, not just specs.")
 
         st.divider()
 
         # 2. SEGMENT SUMMARY TABLE (The "Gap" Analysis)
         st.markdown("#### 📊 Segment Summary: Best vs Worst")
         gap_data = pd.DataFrame({
-            "Position": ["Ruck", "Ruck", "Forward", "Forward", "Defender", "Midfield", "Midfield"],
-            "Treatment": ["Height", "Weight", "Weight", "Height", "Weight", "Height", "Weight"],
-            "Best Segment": ["Young (<23): +7.24", "Rookies (<50 games): +5.19", "Young (<23): +0.15", "Prime (23-28): +0.91", "Rookies (<50 games): -0.11", "Young (<23): +0.04", "Rookies (<50 games): +0.27"],
-            "Worst Segment": ["Veterans (>150 games): -5.03", "Veterans (>150 games): -0.53", "Veterans (>150 games): -1.56", "Veterans (>28): -0.51", "Veterans (>28): -0.77", "Veterans (>28): -0.54", "Established (50-150 games): -0.11"],
-            "Gap": [12.27, 5.72, 1.71, 1.42, 0.66, 0.58, 0.38]
+            "Position":  ["Ruck",                  "Ruck",                   "Forward",                    "Forward",               "Defender",                  "Midfield",              "Midfield"],
+            "Treatment": ["Height",                 "Weight",                 "Weight",                     "Height",                "Weight",                    "Height",                "Weight"],
+            # Best/Worst from hte_results.csv
+            "Best Segment":  [
+                "Young (<23): +8.16",
+                "Rookies (<50 games): +5.16",
+                "Young (<23): +0.10",
+                "Prime (23-28): +0.84",
+                "Rookies (<50 games): -0.11",
+                "Young (<23): +0.03",
+                "Rookies (<50 games): +0.27",
+            ],
+            "Worst Segment": [
+                "Veterans (>150 games): -5.03",
+                "Veterans (>150 games): -0.53",
+                "Veterans (>150 games): -1.55",
+                "Veterans (>28): -0.51",
+                "Veterans (>28): -0.77",
+                "Veterans (>150 games): -0.49",
+                "Veterans (>150 games): -0.17",
+            ],
+            # Gap = Best - Worst (from actual hte_results.csv)
+            "Gap": [13.19, 5.69, 1.66, 1.35, 0.66, 0.52, 0.44],
         })
         st.dataframe(gap_data.style.background_gradient(subset=['Gap'], cmap='Reds'), use_container_width=True, hide_index=True)
 
@@ -498,43 +542,43 @@ with tabs[2]:
         with st.expander("🏋️ Ruck (Massive Height & Weight Effects)", expanded=True):
             r_col1, r_col2 = st.columns(2)
             with r_col1:
-                st.markdown("**Height → HitOuts (ATE: +1.05)**")
+                st.markdown("**Height → HitOuts (ATE: +3.66)**")
                 r1, r2 = st.columns(2)
-                r1.metric("Best: Young (<23)", "+7.24", "Massive Advantage")
+                r1.metric("Best: Young (<23)", "+8.16", "Massive Advantage")
                 r2.metric("Worst: Veterans (>150 games)", "-5.03", "Liability", delta_color="inverse")
                 st.caption("Height is a massive advantage for young rucks but a liability for veterans.")
             with r_col2:
-                st.markdown("**Weight → HitOuts (ATE: +4.03)**")
+                st.markdown("**Weight → HitOuts (ATE: +4.22)**")
                 r3, r4 = st.columns(2)
-                r3.metric("Best: Rookies (<50 games)", "+5.19", "Strong Positive")
+                r3.metric("Best: Rookies (<50 games)", "+5.16", "Strong Positive")
                 r4.metric("Worst: Veterans (>150 games)", "-0.53", "Negative", delta_color="inverse")
                 st.caption("Weight helps rucks of all ages EXCEPT veterans.")
 
         with st.expander("🎯 Forward (Height vs Weight)"):
             f_col1, f_col2 = st.columns(2)
             with f_col1:
-                st.markdown("**Height → TotalScore (ATE: +0.31)**")
+                st.markdown("**Height → TotalScore (ATE: +0.06)**")
                 f1, f2 = st.columns(2)
-                f1.metric("Best: Prime (23-28)", "+0.91", "Helps Prime")
+                f1.metric("Best: Prime (23-28)", "+0.84", "Helps Prime")
                 f2.metric("Worst: Veterans (>28)", "-0.51", "Hurts Veterans", delta_color="inverse")
                 st.caption("Height helps prime-age forwards but hurts veterans.")
             with f_col2:
-                st.markdown("**Weight → TotalScore (ATE: -0.29)**")
+                st.markdown("**Weight → TotalScore (ATE: -0.32)**")
                 f3, f4 = st.columns(2)
-                f3.metric("Best: Young (<23)", "+0.15", "Only positive segment")
-                f4.metric("Worst: Veterans (>150 games)", "-1.56", "Destroys performance", delta_color="inverse")
+                f3.metric("Best: Young (<23)", "+0.10", "Only positive segment")
+                f4.metric("Worst: Veterans (>150 games)", "-1.55", "Destroys performance", delta_color="inverse")
                 st.caption("'Power forwards' thrive early but decline faster.")
 
         with st.expander("🏃 Midfield & 🛡️ Defender"):
             m_col1, m_col2 = st.columns(2)
             with m_col1:
-                st.markdown("**Midfield: Weight → Clearances (ATE: +0.05)**")
+                st.markdown("**Midfield: Weight → Clearances (ATE: +0.21)**")
                 m1, m2 = st.columns(2)
                 m1.metric("Best: Rookies (<50 games)", "+0.27", "Peak physical years")
-                m2.metric("Worst: Established (50-150 games)", "-0.11", "Advantage fades", delta_color="inverse")
+                m2.metric("Worst: Veterans (>150 games)", "-0.17", "Advantage fades", delta_color="inverse")
                 st.caption("Weight helps young/rookie midfielders, but advantage disappears with age.")
             with m_col2:
-                st.markdown("**Defender: Weight → Rebounds (ATE: -0.32)**")
+                st.markdown("**Defender: Weight → Rebounds (ATE: -0.25)**")
                 d1, d2 = st.columns(2)
                 d1.metric("Best: Rookies (<50 games)", "-0.11", "Least negative")
                 d2.metric("Worst: Veterans (>28)", "-0.77", "Hurts badly", delta_color="inverse")
@@ -594,7 +638,7 @@ with tabs[3]:
                     st.dataframe(pos_feat_display, use_container_width=True, hide_index=True)
                 
                 if pos == "Forward":
-                    st.markdown("**Top Drivers (Linear):**\n1. 🟢 MarksInside50\n2. 🟢 Frees\n3. 🟢 Disposals\n4. 🔴 Clangers")
+                    st.markdown("**Top Drivers (Linear):**\n1. 🟢 MarksInside50\n2. 🟢 Frees\n3. 🟢 BMISquared (non-linear body type)\n4. 🔴 Clangers")
                 elif pos == "Midfield":
                     st.markdown("**Top Drivers (Linear):**\n1. 🟢 Disposals\n2. 🟢 Frees / FreesAgainst\n3. 🟢 Weight")
                 elif pos == "Ruck":

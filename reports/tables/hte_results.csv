@@ -1,0 +1,43 @@
+Position,Treatment,Outcome,Segment,Benefit,N
+Forward,Height,TotalScore,Young (<23),-0.14592787340603383,1723
+Forward,Height,TotalScore,Prime (23-28),0.840445829080665,3390
+Forward,Height,TotalScore,Veterans (>28),-0.5055213773212796,1262
+Forward,Height,TotalScore,Rookies (<50 games),0.0440848806976014,3127
+Forward,Height,TotalScore,Established (50-150 games),0.7087745555046618,2719
+Forward,Height,TotalScore,Veterans (>150 games),-0.1990581887205517,529
+Forward,Weight,TotalScore,Young (<23),0.10301650566758629,1723
+Forward,Weight,TotalScore,Prime (23-28),-0.173868377669371,3390
+Forward,Weight,TotalScore,Veterans (>28),-1.1502200292686087,1262
+Forward,Weight,TotalScore,Rookies (<50 games),0.12382690709526256,3127
+Forward,Weight,TotalScore,Established (50-150 games),-0.525303660825843,2719
+Forward,Weight,TotalScore,Veterans (>150 games),-1.5546316118569365,529
+Midfield,Height,Clearances,Young (<23),0.028025624125053328,2504
+Midfield,Height,Clearances,Prime (23-28),-0.2345652537594378,3929
+Midfield,Height,Clearances,Veterans (>28),-0.5383294660297354,1623
+Midfield,Height,Clearances,Rookies (<50 games),0.02699870316607602,3519
+Midfield,Height,Clearances,Established (50-150 games),-0.3721435968111073,3387
+Midfield,Height,Clearances,Veterans (>150 games),-0.48669349271318185,1150
+Midfield,Weight,Clearances,Young (<23),0.21290938402064882,2504
+Midfield,Weight,Clearances,Prime (23-28),-0.019362332992925082,3929
+Midfield,Weight,Clearances,Veterans (>28),-0.03890432216323458,1623
+Midfield,Weight,Clearances,Rookies (<50 games),0.26996462627224843,3519
+Midfield,Weight,Clearances,Established (50-150 games),-0.10520090791444917,3387
+Midfield,Weight,Clearances,Veterans (>150 games),-0.1737228420506353,1150
+Ruck,Height,HitOuts,Young (<23),8.16255246763644,230
+Ruck,Height,HitOuts,Prime (23-28),0.9450167790982733,964
+Ruck,Height,HitOuts,Veterans (>28),-2.210215660866271,470
+Ruck,Height,HitOuts,Rookies (<50 games),2.860585361119558,845
+Ruck,Height,HitOuts,Established (50-150 games),0.0017041444083344484,686
+Ruck,Height,HitOuts,Veterans (>150 games),-5.028434520377252,133
+Ruck,Weight,HitOuts,Young (<23),6.315448368113974,230
+Ruck,Weight,HitOuts,Prime (23-28),4.5756292907034215,964
+Ruck,Weight,HitOuts,Veterans (>28),1.8098136019199453,470
+Ruck,Weight,HitOuts,Rookies (<50 games),5.162810227715758,845
+Ruck,Weight,HitOuts,Established (50-150 games),3.531013040431387,686
+Ruck,Weight,HitOuts,Veterans (>150 games),-0.5321611605192486,133
+Defender,Weight,Rebounds,Young (<23),-0.11815778532985245,2262
+Defender,Weight,Rebounds,Prime (23-28),-0.20602147343629848,4843
+Defender,Weight,Rebounds,Veterans (>28),-0.7686389761258114,2226
+Defender,Weight,Rebounds,Rookies (<50 games),-0.11139274089317011,4305
+Defender,Weight,Rebounds,Established (50-150 games),-0.5132570511101227,4111
+Defender,Weight,Rebounds,Veterans (>150 games),-0.42238227373263876,915
