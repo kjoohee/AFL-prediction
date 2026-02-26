@@ -98,11 +98,14 @@ AFL-prediction/
 │   │   ├── Causal Model/            # HTE plots for physical attributes
 │   │   └── Predictive Model/        # Coefficients, SHAP values, and model comparisons
 │   └── tables/                      
+│       └── ate_results.csv               # ATE estimates for H1–H4 (Height, Weight, BMI, Home) by position
+│       └── hte_results.csv               # Heterogeneous treatment effects by age group and career stage
 │       └── predictive_model_summary.xlsx # Quantitative performance metrics
+│       └── rule_change_results.csv       # Pre/post ATE for AFL rule changes (6-6-6, Stand Rule, Rotation Caps)
 │
 ├── src/                             # Source code modules
 │   └── visualization/               
-│       └── Dashboard.v3.py          # Streamlit dashboard source
+│       └── Dashboard.vf.py          # Streamlit dashboard source
 │
 ├── .gitignore                       # Files to ignore (e.g., .DS_Store)
 ├── requirements.txt                 # Python dependencies
