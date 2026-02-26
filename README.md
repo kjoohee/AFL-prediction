@@ -43,7 +43,7 @@ Our causal inference analysis tested six core hypotheses about factors influenci
 | **H4** | is_home | Key outcomes | Only rucks benefit (+0.32 HitOuts) - familiar bounce rhythms matter |
 | **H5** | Rule changes | How effects changed over time | 6-6-6 rule made height 9x more valuable (+896%); rotation caps nearly eliminated weight advantage |
 
-## Predictive Model (Coming Soon - in `/models` folder)
+## Predictive Model (in `/models` folder)
 
 ### Model Architecture
 We are developing a **stacked ensemble model** that combines:
@@ -89,11 +89,8 @@ AFL-prediction/
 │
 ├── data/                           # Data directory
 │   ├── raw/                        # Original, immutable data (stats.csv, players.csv, games.csv)
-│   ├── processed/                   # Cleaned, transformed data (df_final.csv)
-│   └── external/                    # Any supplementary data
+│   └── processed/                   # Cleaned, transformed data (df_final.csv)
 │
-├── notebooks/                       # Jupyter notebooks for analysis
-│   └── stats_correlation_heatmap.png # Visualization outputs
 │
 ├── Models/                          # Model artifacts and notebooks (MAIN FOCUS)
 │   └── Casual Model.ipynb           # Completed causal inference analysis (H1-H5)
