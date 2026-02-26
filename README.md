@@ -31,19 +31,8 @@ We developed a **two-part analytics engine**:
 
 1. **Predictive Model** *(located in `/models` folder)*: A machine learning system that predicts goal-scoring probability for individual players based on their attributes and game context, with full explainability via SHAP.
 2. **Causal Inference Model** *(located in `/models` folder)*: Tests hypotheses about *why* performance happens—understanding the causal impact of physical attributes (height, weight, BMI) and rule changes on player performance across positions.
-   
-## Hypothesis & Research Questions (Causal Analysis)
-Our causal inference analysis tested six core hypotheses about factors influencing AFL player performance:
 
-| Hypothesis | Treatment | Effect On | Key Finding |
-|------------|-----------|-----------|-------------|
-| **H1** | Height | Position-specific outcomes | Rucks (+4.84 HitOuts) - MASSIVE effect; Forwards (-0.31) - negative |
-| **H2** | Weight | Clearances, HitOuts | Rucks (+4.69) & Midfield (+0.68) benefit; Forwards/Defenders don't |
-| **H3** | BMI | Running vs contest stats | Higher BMI benefits EVERY position - modern game rewards physicality |
-| **H4** | is_home | Key outcomes | Only rucks benefit (+0.32 HitOuts) - familiar bounce rhythms matter |
-| **H5** | Rule changes | How effects changed over time | 6-6-6 rule made height 9x more valuable (+896%); rotation caps nearly eliminated weight advantage |
-
-## Predictive Model (in `/models` folder)
+## Predictive Model (in /models folder)
 
 ### Model Architecture
 We are developing a **stacked ensemble model** that combines:
@@ -68,6 +57,17 @@ We implement **SHAP (SHapley Additive exPlanations)** to:
 - **Primary Metric:** AUC-ROC (Area Under the Receiver Operating Characteristic Curve)
 - **Secondary Metrics:** Precision, Recall, F1-Score, Log-Loss
 - **Validation Strategy:** Time-based split to prevent data leakage (train on 2012-2022, validate on 2023-2025)
+
+## Hypothesis & Research Questions (Causal Analysis)
+Our causal inference analysis tested six core hypotheses about factors influencing AFL player performance:
+
+| Hypothesis | Treatment | Effect On | Key Finding |
+|------------|-----------|-----------|-------------|
+| **H1** | Height | Position-specific outcomes | Rucks (+4.84 HitOuts) - MASSIVE effect; Forwards (-0.31) - negative |
+| **H2** | Weight | Clearances, HitOuts | Rucks (+4.69) & Midfield (+0.68) benefit; Forwards/Defenders don't |
+| **H3** | BMI | Running vs contest stats | Higher BMI benefits EVERY position - modern game rewards physicality |
+| **H4** | is_home | Key outcomes | Only rucks benefit (+0.32 HitOuts) - familiar bounce rhythms matter |
+| **H5** | Rule changes | How effects changed over time | 6-6-6 rule made height 9x more valuable (+896%); rotation caps nearly eliminated weight advantage |
 
 ## Data Overview
 
